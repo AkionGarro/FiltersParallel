@@ -1,0 +1,11 @@
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\bin\Debug\ImagesConcurrentExample.exe.config
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\bin\Debug\ImagesConcurrentExample.exe
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\bin\Debug\ImagesConcurrentExample.pdb
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\bin\Debug\Filters.dll
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\bin\Debug\Filters.pdb
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\obj\Debug\ImagesConcurrentExample.csproj.AssemblyReference.cache
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\obj\Debug\ImagesConcurrentExample.csproj.SuggestedBindingRedirects.cache
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\obj\Debug\ImagesConcurrentExample.csproj.CoreCompileInputs.cache
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\obj\Debug\ImagesConcurrentExample.csproj.CopyComplete
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\obj\Debug\ImagesConcurrentExample.exe
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\ImagesConcurrentExample\obj\Debug\ImagesConcurrentExample.pdb
