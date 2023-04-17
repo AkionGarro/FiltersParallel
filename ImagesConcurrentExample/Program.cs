@@ -44,7 +44,7 @@ namespace ImagesConcurrentExample
             foreach (string file in Directory.GetFiles(imagePath))
             {
                 Bitmap bitmap = (Bitmap)Image.FromFile(file);
-                bitmap = Filters.Filters.GrayScaleParallel4(bitmap);
+                bitmap = Filters.Filters.GrayScaleParallel(bitmap);
                 bitmap.Save(newImagePath + "\\" + Path.GetFileNameWithoutExtension(file) + Guid.NewGuid().ToString() + ".jpg");
             }
             Console.WriteLine("Parallel Foraech - execution time = {0} seconds\n", stopWatch.Elapsed.TotalSeconds);
@@ -63,7 +63,7 @@ namespace ImagesConcurrentExample
             Parallel.ForEach(Directory.GetFiles(imagePath), file =>
             {
                 Bitmap bitmap = (Bitmap)Image.FromFile(file);
-                bitmap = Filters.Filters.GrayScale(bitmap);
+                bitmap = Filters.Filters.TwoPartsGrayFilterParallel(bitmap);
                 bitmap.Save(newImagePath + "\\" + Path.GetFileNameWithoutExtension(file) + Guid.NewGuid().ToString() + ".jpg");
             });
             Console.WriteLine("Parallel Foraech - execution time = {0} seconds\n", stopWatch.Elapsed.TotalSeconds);

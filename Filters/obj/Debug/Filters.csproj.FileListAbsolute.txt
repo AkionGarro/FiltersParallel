@@ -4,3 +4,9 @@ D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\Filters\obj\Debug\Filters.cspro
 D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\Filters\obj\Debug\Filters.csproj.CoreCompileInputs.cache
 D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\Filters\obj\Debug\Filters.dll
 D:\TEC-GIT\Git\Operativos\TareaMulticore\Filters\Filters\obj\Debug\Filters.pdb
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Repo\FiltersParallel\Filters\bin\Debug\Filters.dll
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Repo\FiltersParallel\Filters\bin\Debug\Filters.pdb
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Repo\FiltersParallel\Filters\obj\Debug\Filters.csproj.AssemblyReference.cache
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Repo\FiltersParallel\Filters\obj\Debug\Filters.csproj.CoreCompileInputs.cache
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Repo\FiltersParallel\Filters\obj\Debug\Filters.dll
+D:\TEC-GIT\Git\Operativos\TareaMulticore\Repo\FiltersParallel\Filters\obj\Debug\Filters.pdb

@@ -34,135 +34,273 @@ namespace Filters
             }
             return bm;
         }
+        
 
-        public static Bitmap GrayScaleParallel4(Bitmap source)
+
+        //No funciona correctamente pero si lo realiza, dura un poco más
+        public static Bitmap GrayScaleParallel(Bitmap source)
         {
-            Rectangle rect = new Rectangle(0, 0, source.Width, source.Height / 2);
-            Bitmap firstHalf = source.Clone(rect, source.PixelFormat);
+           
+            Bitmap firstHalf = new Bitmap(source.Width, source.Height);
 
-            rect = new Rectangle(0, source.Height / 2, source.Width, source.Height / 2);
-            Bitmap secondHalf = source.Clone(rect, source.PixelFormat);
+          
+            Bitmap secondHalf = new Bitmap(source.Width, source.Height);
+
+
+            Bitmap newImage = new Bitmap(source.Width, source.Height);
+
+            using (Graphics graphics = Graphics.FromImage(firstHalf))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            using (Graphics graphics = Graphics.FromImage(secondHalf))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            using (Graphics graphics = Graphics.FromImage(newImage))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            object lockObject = new object(); // Create a lock object
+
 
             Parallel.Invoke(
                 () =>
+
                 {
-                    Parallel.For(0, firstHalf.Width, i => {
-                        Parallel.For(0, firstHalf.Height, j => {
-                            Color c = firstHalf.GetPixel(x, y);
-                            int average = (Convert.ToInt32(c.R) + Convert.ToInt32(c.G) + Convert.ToInt32(c.B)) / 3;
-                            firstHalf.SetPixel(x, y, Color.FromArgb(average, average, average));
-                        });
-                    });
+                    lock (lockObject) // Lock the bitmap to prevent concurrent access
+                    {
+                        
+                            for (int i = 0; i < firstHalf.Width; i++)
+                            {
+                                Parallel.For(0, firstHalf.Height, j =>
+                                {
+                                lock (firstHalf)
+                                {
+                                    {
+                                        Color c = firstHalf.GetPixel(i, j);
+                                        int average = (Convert.ToInt32(c.R) + Convert.ToInt32(c.G) + Convert.ToInt32(c.B)) / 3;
+                                        lock (newImage)
+                                        {
+                                            newImage.SetPixel(i, j, Color.FromArgb(average, average, average));
+                                        }
+
+                                    }
+                                    }
+
+                                });
+                            }
+
+                    }
                 },
+
                 () =>
                 {
-                    Parallel.For(0, secondHalf.Width, i => {
-                        Parallel.For(0, secondHalf.Height, j => {
-                            Color c = secondHalf.GetPixel(x, y);
-                            int average = (Convert.ToInt32(c.R) + Convert.ToInt32(c.G) + Convert.ToInt32(c.B)) / 3;
-                            secondHalf.SetPixel(x, y, Color.FromArgb(average, average, average));
-                        });
-                    });
-                }
-            );
-            Bitmap bm = new Bitmap(firstHalf.Width, firstHalf.Height + firstHalf.Height);
-            Graphics g = Graphics.FromImage(bm);
-            g.DrawImageUnscaled(firstHalf, 0, 0);
-            g.DrawImageUnscaled(secondHalf, 0, firstHalf.Height);
-
-            return bm;
-        }
-    
-
-
-
-        public static Bitmap GaussianBlur(Bitmap source)
-            {
-                int radius = 5;
-
-                //Crea un nuevo bitmap con las dimensiones de la imagen proporcionada
-                Bitmap newImage = new Bitmap(source.Width, source.Height);
-            
-
-                //Crea una copia de la imagen recibida.
-                using (Graphics graphics = Graphics.FromImage(newImage))
-                {
-                    graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
-                        new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
-                }
-
-                // Basicamente no está aplicando el filtro entonces se retorna la imagen
-                if (radius < 1) return newImage;
-
-
-
-                int size = radius * 2 + 1;
-
-                //Matriz para guardar los coeficientes de la ecuación.
-                double[,] gaussMatrix = new double[size, size];
-
-                double sum = 0;
-
-
-                //Recorre toda la matriz asignando valores a cada uno de los pixeles
-            
-                for (int y = -radius; y <= radius; y++)
-                {
-                    for (int x = -radius; x <= radius; x++)
+                    lock (lockObject)
                     {
-                        //posicion entre el elemento actual y el centro de la matriz
-                        double distance = Math.Sqrt(x * x + y * y);
-
-                        //valor del elemento actual al aplicar la ecuacion guassiana
-                        double weight = Math.Exp(-(distance * distance) / (2 * radius * radius));
-
-                        //se almacena el valor 
-                        gaussMatrix[y + radius, x + radius] = weight;
-
-                        sum += weight;
-                    }
-                }
-
-
-                //Empieza a recorrer por la imagen de manera horizontal bajando por cada fila
-
-                for (int y = 0; y < newImage.Height; y++)
-                {
-                    for (int x = 0; x < newImage.Width; x++)
-                    {
-                        //se va obteniendo cada pixel dentro de la image
-                        Color pixel = newImage.GetPixel(x, y);
-
-                        double red = 0, green = 0, blue = 0;
-
-                        // Se hace un recorrido por los pixeles adyacente al pixel actual que se esta trabajando
-                        for (int gaussY = -radius; gaussY <= radius; gaussY++)
+                        for (int i = 0; i < secondHalf.Width; i++)
                         {
-                            for (int gaussX = -radius; gaussX <= radius; gaussX++)
+                            Parallel.For(0, secondHalf.Height, j =>
                             {
-                                if (x + gaussX < 0 || x + gaussX >= newImage.Width || y + gaussY < 0 || y + gaussY >= newImage.Height) continue;
+                                lock (secondHalf)
+                                {
+                                    {
+                                        Color c = secondHalf.GetPixel(i, j);
+                                        int average = (Convert.ToInt32(c.R) + Convert.ToInt32(c.G) + Convert.ToInt32(c.B)) / 3;
+                                        lock (newImage)
+                                        {
+                                            newImage.SetPixel(i, j, Color.FromArgb(average, average, average));
+                                        }
 
-                                Color gaussPixel = newImage.GetPixel(x + gaussX, y + gaussY);
-                                red += gaussPixel.R * gaussMatrix[gaussY + radius, gaussX + radius];
-                                green += gaussPixel.G * gaussMatrix[gaussY + radius, gaussX + radius];
-                                blue += gaussPixel.B * gaussMatrix[gaussY + radius, gaussX + radius];
-                            }
+                                    }
+                                }
+                                
+                            });
                         }
-
-                        red /= sum;
-                        green /= sum;
-                        blue /= sum;
-
-                        newImage.SetPixel(x, y, Color.FromArgb(pixel.A, (int)red, (int)green, (int)blue));
                     }
+
                 }
+                    
+            );
+
+            return newImage;
+        }
+
+        
+
+        
+        public static Bitmap TwoPartsGrayFilterParallel(Bitmap source)
+        {
+            Bitmap newImage1 = new Bitmap(source.Width, source.Height);
+            Bitmap newImage2 = new Bitmap(source.Width, source.Height);
+
+            Bitmap newImage3 = new Bitmap(source.Width, source.Height);
 
 
-                return newImage;
+            //Crea una copia de la imagen recibida.
+            using (Graphics graphics = Graphics.FromImage(newImage1))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            using (Graphics graphics = Graphics.FromImage(newImage2))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            using (Graphics graphics = Graphics.FromImage(newImage3))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            int halfWidth1 = newImage1.Width / 2;
+            int height1 = newImage1.Height;
+            int width1 = newImage1.Width;
+
+            int halfWidth2 = newImage2.Width / 2;
+            int height2 = newImage2.Height;
+            int width2 = newImage2.Width;
+
+
+            Parallel.Invoke(
+              () =>
+              {
+                  for (int y = 0; y < height1; y++)
+                  {
+                      for (int x = 0; x < halfWidth1; x++)
+                      {
+                          Color c = newImage1.GetPixel(x, y);
+                          int average = (Convert.ToInt32(c.R) + Convert.ToInt32(c.G) + Convert.ToInt32(c.B)) / 3;
+
+                          lock (newImage3)
+                          {
+                              newImage3.SetPixel(x, y, Color.FromArgb(average, average, average));
+                          }
+                         
+                      }
+                  }
+              },
+              () =>
+              {
+                  for (int y = 0; y < height2; y++)
+                  {
+                      for (int x = halfWidth2; x < width2; x++)
+                      {
+                          Color c = newImage2.GetPixel(x, y);
+                          int average = (Convert.ToInt32(c.R) + Convert.ToInt32(c.G) + Convert.ToInt32(c.B)) / 3;
+                          lock (newImage3)
+                          {
+                              newImage3.SetPixel(x, y, Color.FromArgb(average, average, average));
+                          }
+                         
+                      }
+                  }
+              }
+          );
+
+
+
+            return newImage3;
+        }
+
+
+        //Funciona
+        public static Bitmap GaussianBlur(Bitmap source)
+        {
+            int radius = 5;
+
+            //Crea un nuevo bitmap con las dimensiones de la imagen proporcionada
+            Bitmap newImage = new Bitmap(source.Width, source.Height);
+
+
+            //Crea una copia de la imagen recibida.
+            using (Graphics graphics = Graphics.FromImage(newImage))
+            {
+                graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+
+            // Basicamente no está aplicando el filtro entonces se retorna la imagen
+            if (radius < 1) return newImage;
+
+
+
+            int size = radius * 2 + 1;
+
+            //Matriz para guardar los coeficientes de la ecuación.
+            double[,] gaussMatrix = new double[size, size];
+
+            double sum = 0;
+
+
+            //Recorre toda la matriz asignando valores a cada uno de los pixeles
+
+            for (int y = -radius; y <= radius; y++)
+            {
+                for (int x = -radius; x <= radius; x++)
+                {
+                    //posicion entre el elemento actual y el centro de la matriz
+                    double distance = Math.Sqrt(x * x + y * y);
+
+                    //valor del elemento actual al aplicar la ecuacion guassiana
+                    double weight = Math.Exp(-(distance * distance) / (2 * radius * radius));
+
+                    //se almacena el valor 
+                    gaussMatrix[y + radius, x + radius] = weight;
+
+                    sum += weight;
+                }
             }
 
 
+            //Empieza a recorrer por la imagen de manera horizontal bajando por cada fila
 
+            for (int y = 0; y < newImage.Height; y++)
+            {
+                for (int x = 0; x < newImage.Width; x++)
+                {
+                    //se va obteniendo cada pixel dentro de la image
+                    Color pixel = newImage.GetPixel(x, y);
+
+                    double red = 0, green = 0, blue = 0;
+
+                    // Se hace un recorrido por los pixeles adyacente al pixel actual que se esta trabajando
+                    for (int gaussY = -radius; gaussY <= radius; gaussY++)
+                    {
+                        for (int gaussX = -radius; gaussX <= radius; gaussX++)
+                        {
+                            if (x + gaussX < 0 || x + gaussX >= newImage.Width || y + gaussY < 0 || y + gaussY >= newImage.Height) continue;
+
+                            Color gaussPixel = newImage.GetPixel(x + gaussX, y + gaussY);
+                            red += gaussPixel.R * gaussMatrix[gaussY + radius, gaussX + radius];
+                            green += gaussPixel.G * gaussMatrix[gaussY + radius, gaussX + radius];
+                            blue += gaussPixel.B * gaussMatrix[gaussY + radius, gaussX + radius];
+                        }
+                    }
+
+                    red /= sum;
+                    green /= sum;
+                    blue /= sum;
+
+                    newImage.SetPixel(x, y, Color.FromArgb(pixel.A, (int)red, (int)green, (int)blue));
+                }
+            }
+
+
+            return newImage;
+        }
+
+
+        //Funciona
         public static Bitmap TwoPartsParallelGaussianBlur(Bitmap source)
         {
             int radius = 5;
@@ -265,7 +403,7 @@ namespace Filters
                             {
                                 newImage3.SetPixel(x, y, Color.FromArgb(pixel.A, (int)red, (int)green, (int)blue));
                             }
-                           
+
                         }
                     }
                 },
@@ -310,7 +448,7 @@ namespace Filters
         }
 
 
-
+        //Funciona
         public static Bitmap FourPartsParallelGaussianBlur(Bitmap source)
         {
             int radius = 5;
@@ -382,18 +520,18 @@ namespace Filters
                     sum += weight;
                 }
             }
-            
+
             //Divide the image into two sections
             int halfWidth1 = newImage1.Width / 2;
             int width1 = newImage1.Width;
             int height1 = newImage1.Height;
-            int halfHeight1 = newImage1.Height/2;
+            int halfHeight1 = newImage1.Height / 2;
 
             int halfWidth2 = newImage1.Width / 2;
             int width2 = newImage1.Width;
             int height2 = newImage1.Height;
             int halfHeight2 = newImage1.Height / 2;
-            
+
 
             int halfWidth3 = newImage1.Width / 2;
             int width3 = newImage1.Width;
@@ -407,7 +545,7 @@ namespace Filters
             int halfHeight4 = newImage1.Height / 2;
 
 
-            
+
 
             //Apply the Gaussian blur filter to each section in parallel using Parallel.Invoke
             Parallel.Invoke(
@@ -569,11 +707,6 @@ namespace Filters
                 );
             return newImage5;
         }
-
-
-
-
-
         public static Bitmap AntiAlias(Bitmap bitmap)
         {
             // Create a new bitmap to hold the anti-aliased image
@@ -584,7 +717,7 @@ namespace Filters
             {
                 for (int y = 0; y < bitmap.Height; y++)
                 {
-                    Color color = GetAntiAliasingPixel(bitmap, x, y);
+                    Color color = GetAntiAliasingPixel1(bitmap, x, y);
                     antiAliasedBitmap.SetPixel(x, y, color);
                 }
             }
@@ -593,24 +726,127 @@ namespace Filters
             return antiAliasedBitmap;
         }
 
-        private static Color GetAntiAliasingPixel(Bitmap bitmap, int x, int y)
+
+        public static Bitmap AntiAliasParallel(Bitmap bitmap)
+        {
+            // Create a new bitmap to hold the anti-aliased image
+            Bitmap antiAliasedBitmap = new Bitmap(bitmap.Width, bitmap.Height);
+
+            Rectangle rect1 = new Rectangle(0, 0, bitmap.Width, bitmap.Height / 2);
+            Bitmap firstHalf = bitmap.Clone(rect1, bitmap.PixelFormat);
+
+            Rectangle rect2 = new Rectangle(0, bitmap.Height / 2, bitmap.Width, bitmap.Height / 2);
+            Bitmap secondHalf = bitmap.Clone(rect2, bitmap.PixelFormat);
+
+            object lockObject = new object(); // Create a lock object
+
+            Parallel.Invoke(
+            () =>
+            {
+                lock (lockObject) // Lock the bitmap to prevent concurrent access    
+                {
+                    // Apply the anti-aliasing algorithm to each pixel in firstHalf bitmap
+                    Parallel.For(0, firstHalf.Width, x =>
+                    {
+                        lock (firstHalf) // Lock the bitmap to prevent concurrent access    
+                        {
+                            for (int y = 0; y < firstHalf.Height; y++)
+                            {
+
+                                Color color = GetAntiAliasingPixel1(firstHalf, x, y);
+
+                                firstHalf.SetPixel(x, y, color);
+
+                            }
+                        }
+                    });
+                }
+            },
+            () =>
+            {
+                lock (lockObject) // Lock the bitmap to prevent concurrent access
+                {
+                    // Apply the anti-aliasing algorithm to each pixel in secondHalf bitmap
+                    Parallel.For(0, secondHalf.Width, x =>
+                    {
+                        lock (secondHalf) // Lock the bitmap to prevent concurrent access
+                        {
+                            for (int y = 0; y < secondHalf.Height; y++)
+                            {
+                                Color color = GetAntiAliasingPixel1(secondHalf, x, y);
+
+                                secondHalf.SetPixel(x, y, color);
+
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Create a new bitmap to hold the final anti-aliased image
+            Bitmap resultBitmap = new Bitmap(firstHalf.Width, firstHalf.Height + secondHalf.Height);
+            Graphics g = Graphics.FromImage(resultBitmap);
+            g.DrawImageUnscaled(firstHalf, 0, 0);
+            g.DrawImageUnscaled(secondHalf, 0, firstHalf.Height);
+
+            return resultBitmap;
+
+        }
+
+        public static Bitmap AntiAliasPara2(Bitmap bitmap)
+        {
+            // Create a new bitmap to hold the anti-aliased image
+            Bitmap antiAliasedBitmap = new Bitmap(bitmap.Width, bitmap.Height);
+
+            // Create an object for locking access to the bitmap
+            object lockObject = new object();
+
+            // Define the delegate for processing each pixel
+            Action<int> processPixel = x =>
+            {
+                for (int y = 0; y < bitmap.Height; y++)
+                {
+                    Color color;
+                    lock (lockObject)
+                    {
+                        // Use lock to ensure exclusive access to the bitmap
+                        color = GetAntiAliasingPixel1(bitmap, x, y);
+                    }
+                    antiAliasedBitmap.SetPixel(x, y, color);
+                }
+            };
+
+            // Use Parallel.For to process each column of pixels in parallel
+            Parallel.For(0, bitmap.Width, processPixel);
+
+            // Return the anti-aliased bitmap
+            return antiAliasedBitmap;
+
+        }
+
+        private static Color GetAntiAliasingPixel1(Bitmap bitmap, int x, int y)
         {
             // Check if the pixel is at the edge of the bitmap
             if (x == 0 || y == 0 || x == bitmap.Width - 1 || y == bitmap.Height - 1)
             {
-                // If so, return the pixel color unchanged
-                return bitmap.GetPixel(x, y);
+                lock (bitmap)
+                {
+                    // If so, return the pixel color unchanged
+                    Color color = bitmap.GetPixel(x, y);
+                    return color;
+                }
             }
 
-            // Get the average color of the surrounding pixels using recursion
-            Color c1 = GetAntiAliasingPixel(bitmap, x - 1, y - 1);
-            Color c2 = GetAntiAliasingPixel(bitmap, x, y - 1);
-            Color c3 = GetAntiAliasingPixel(bitmap, x + 1, y - 1);
-            Color c4 = GetAntiAliasingPixel(bitmap, x - 1, y);
-            Color c5 = GetAntiAliasingPixel(bitmap, x + 1, y);
-            Color c6 = GetAntiAliasingPixel(bitmap, x - 1, y + 1);
-            Color c7 = GetAntiAliasingPixel(bitmap, x, y + 1);
-            Color c8 = GetAntiAliasingPixel(bitmap, x + 1, y + 1);
+
+            // Get the average color of the surrounding pixels
+            Color c1 = bitmap.GetPixel(x - 1, y - 1);
+            Color c2 = bitmap.GetPixel(x, y - 1);
+            Color c3 = bitmap.GetPixel(x + 1, y - 1);
+            Color c4 = bitmap.GetPixel(x - 1, y);
+            Color c5 = bitmap.GetPixel(x + 1, y);
+            Color c6 = bitmap.GetPixel(x - 1, y + 1);
+            Color c7 = bitmap.GetPixel(x, y + 1);
+            Color c8 = bitmap.GetPixel(x + 1, y + 1);
 
             int r = (c1.R + c2.R + c3.R + c4.R + c5.R + c6.R + c7.R + c8.R) / 8;
             int g = (c1.G + c2.G + c3.G + c4.G + c5.G + c6.G + c7.G + c8.G) / 8;
@@ -619,6 +855,7 @@ namespace Filters
             return Color.FromArgb(r, g, b);
         }
 
+
     }
-}
+    }
 
