@@ -24,12 +24,57 @@ namespace ImagesConcurrentExample
         //For get the execution time
         static Stopwatch stopWatch = new Stopwatch();
         #endregion Global variables
+
         static void Main(string[] args)
         {
-            /*for(int i = 1; i < 7; i++)
+            int option;
+            Console.WriteLine("Seleccione una opción:");
+
+            Console.WriteLine("1: Ejecutar todo secuencial");
+            Console.WriteLine("2: Ejecutar todo paralelo");
+            Console.WriteLine("3: Escoger filtro ");
+            Console.WriteLine("4: Salir");
+            Console.Write("Ingrese su opción: ");
+
+            option = Convert.ToInt32(Console.ReadLine());
+
+
+
+            if(option == 1)
+            {
+                RunAllSequantial();
+            }
+            else if(option == 2)
+            {
+                RunAllParallel();
+            }
+            else if (option == 3)
+            {
+                Run();
+            }
+            else
+            {
+                Console.WriteLine("Seleccion incorrecta");
+                System.Environment.Exit(0);
+            }
+
+            
+        }
+
+
+            
+        static void RunAllParallel()
+        {
+            for(int i = 1; i < 7; i++)
             {
                 ParallelMethod(i);
-            }*/
+            }
+            Console.Read();
+
+        }
+        static void RunAllSequantial()
+        {
+
             for (int i = 1; i < 7; i++)
             {
                 SecuencialMethod(i);
@@ -38,84 +83,83 @@ namespace ImagesConcurrentExample
 
         }
 
-            /*
-            static void Main(string[] args)
+        static void Run()
+        {
+
+            int type;
+            int option;
+            Console.WriteLine("Seleccione una opción:");
+
+            Console.WriteLine("1: Secuencial");
+            Console.WriteLine("2: Paralelo");
+            Console.WriteLine("3: Salir");
+            Console.Write("Ingrese su opción: ");
+
+            type = Convert.ToInt32(Console.ReadLine());
+
+            if (type == 3)
             {
 
-                int type;
-                int option;
-                Console.WriteLine("Seleccione una opción:");
-
-                Console.WriteLine("1: Secuencial");
-                Console.WriteLine("2: Paralelo");
-                Console.WriteLine("3: Salir");
-                Console.Write("Ingrese su opción: ");
-
-                type = Convert.ToInt32(Console.ReadLine());
-
-                if (type == 3)
-                {
-
-                    System.Environment.Exit(0);
-                }
-
-
-                Console.Write("\n");
-                Console.Write("\n");
-                Console.WriteLine("Seleccione una opción:");
-                Console.WriteLine("1: GrayScale");
-                Console.WriteLine("2: Gaussian Blur");
-                Console.WriteLine("3: Anti aliasing");
-                Console.WriteLine("4: GrayScaleParallel");
-                Console.WriteLine("5: Gaussian Blur Parallel");
-                Console.WriteLine("6: Anti aliasing Parallel");
-                Console.Write("Ingrese su opción: ");
-                option = Convert.ToInt32(Console.ReadLine());
-
-                switch (type)
-                {
-                    //Sequential images
-                    case 1:
-                        if(option > 0 && option<7)
-                        {
-                            SecuencialMethod(option);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Error ingrese una opcion valida");
-                            break;
-                        }
-
-                        break;
-
-                    //Parallel Images
-                    case 2:
-
-                        if (option > 0 && option < 7)
-                        {
-                            ParallelMethod(option);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Error ingrese una opcion valida");
-                            break;
-                        }
-
-                        break;
-
-                    case 3:
-                        break;
-
-                    default:
-                        Console.WriteLine("Opción inválida");
-                        break;
-                }
-
-
-
-
+                System.Environment.Exit(0);
             }
-            */
+
+
+            Console.Write("\n");
+            Console.Write("\n");
+            Console.WriteLine("Seleccione una opción:");
+            Console.WriteLine("1: GrayScale");
+            Console.WriteLine("2: Gaussian Blur");
+            Console.WriteLine("3: Anti aliasing");
+            Console.WriteLine("4: GrayScaleParallel");
+            Console.WriteLine("5: Gaussian Blur Parallel");
+            Console.WriteLine("6: Anti aliasing Parallel");
+            Console.Write("Ingrese su opción: ");
+            option = Convert.ToInt32(Console.ReadLine());
+
+            switch (type)
+            {
+                //Sequential images
+                case 1:
+                    if(option > 0 && option<7)
+                    {
+                        SecuencialMethod(option);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error ingrese una opcion valida");
+                        break;
+                    }
+
+                    break;
+
+                //Parallel Images
+                case 2:
+
+                    if (option > 0 && option < 7)
+                    {
+                        ParallelMethod(option);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error ingrese una opcion valida");
+                        break;
+                    }
+
+                    break;
+
+                case 3:
+                    break;
+
+                default:
+                    Console.WriteLine("Opción inválida");
+                    break;
+            }
+
+
+
+
+        }
+            
 
             /// <summary>
             /// Apply the gray scale filter in secuencial way
